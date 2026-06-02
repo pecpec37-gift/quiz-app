@@ -303,27 +303,39 @@ body{
 
 /* ─── MISC ─── */
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);}
+/* ── 言語ヘッダー ── */
+#lang-header{position:fixed;top:0;right:0;z-index:9999;display:flex;gap:4px;padding:8px 12px;}
+.lang-btn{background:none;border:2px solid transparent;border-radius:6px;cursor:pointer;font-size:12px;padding:3px 9px;color:#888;font-family:inherit;font-weight:400;transition:all .2s;}
+.lang-btn:hover{color:#f0f0f0;border-color:#3a3a3a;}
+.lang-btn.lang-active{color:#f0f0f0;border-color:#888;font-weight:700;}
 </style>
 </head>
 <body>
+<!-- 言語選択ヘッダー -->
+<div id="lang-header">
+  <button class="lang-btn lang-active" id="lb-ja" onclick="setLang('ja')">JP</button>
+  <button class="lang-btn" id="lb-en" onclick="setLang('en')">EN</button>
+  <button class="lang-btn" id="lb-zh" onclick="setLang('zh')">中</button>
+  <button class="lang-btn" id="lb-ko" onclick="setLang('ko')">한</button>
+</div>
 <div id="app">
-<h2 class="sr-only">地理クイズ — 日本の都道府県と世界の国名</h2>
+<h2 class="sr-only" id="app-sr">地理クイズ — 日本の都道府県と世界の国名</h2>
 
 <!-- ══ TOP ══ -->
 <div id="top-screen" class="screen active">
-  <h1>Geography Quiz</h1>
+  <h1 id="top-h1">Geography Quiz</h1>
   <div class="top-cards">
     <div class="top-card jp" id="btn-jp">
       <span class="card-icon">🗾</span>
-      <div class="card-title">日本の都道府県</div>
-      <div class="card-sub">47都道府県 / 10問</div>
-      <div class="card-arrow">▶ PLAY</div>
+      <div class="card-title" id="jp-card-title">日本の都道府県</div>
+      <div class="card-sub" id="jp-card-sub">47都道府県 / 10問</div>
+      <div class="card-arrow" id="jp-card-arrow">▶ PLAY</div>
     </div>
     <div class="top-card world" id="btn-world">
       <span class="card-icon">🌍</span>
-      <div class="card-title">世界の国名</div>
-      <div class="card-sub">世界195か国 / 10問</div>
-      <div class="card-arrow">▶ PLAY</div>
+      <div class="card-title" id="world-card-title">世界の国名</div>
+      <div class="card-sub" id="world-card-sub">世界195か国 / 10問</div>
+      <div class="card-arrow" id="world-card-arrow">▶ PLAY</div>
     </div>
   </div>
   <button class="ranking-btn" id="btn-ranking">🏆 スコアランキングを見る</button>
@@ -333,7 +345,7 @@ body{
 <div id="rules-overlay">
   <div class="rules-box">
     <h2 id="rules-title">ルール確認</h2>
-    <div class="rules-list">
+    <div class="rules-list" id="rules-list">
       制限時間：<span>100秒</span><br>
       1問正解 → <span>+10点</span>（最大100点）<br>
       間違えると <span>▼10秒</span> ペナルティ<br>
@@ -341,7 +353,7 @@ body{
       満点は最大 <span>200点</span>
     </div>
     <div class="name-row">
-      <label>プレーヤー名（ランキングに表示）</label>
+      <label id="name-label">プレーヤー名（ランキングに表示）</label>
       <input type="text" id="player-name" class="name-input" placeholder="名前を入力..." maxlength="16" autocomplete="off">
     </div>
     <button class="start-go jp-btn" id="go-btn">ゲームスタート</button>
@@ -366,7 +378,7 @@ body{
   <div id="timer-bar-bg"><div id="timer-bar-fill" style="width:100%"></div></div>
   <div id="score-row">
     <span id="q-num">問題 1 / 10</span>
-    <span id="live-score-wrap">得点：<span id="live-score" class="score-jp">0</span></span>
+    <span id="live-score-wrap"><span id="score-label">得点：</span><span id="live-score" class="score-jp">0</span></span>
   </div>
   <div id="hint-card">
     <span id="q-tag" class="tag-jp">名所・観光地</span>
@@ -381,9 +393,9 @@ body{
 <!-- ══ TIMEOUT ══ -->
 <div id="timeout-screen" class="screen">
   <div class="end-card">
-    <h2>⏰ 時間切れ！</h2>
+    <h2 id="timeout-h2">⏰ 時間切れ！</h2>
     <div class="end-score" id="to-score">0</div>
-    <div class="end-unit">点</div>
+    <div class="end-unit" id="to-unit">点</div>
     <p id="to-note" style="font-size:12px;color:#888;margin-bottom:.5rem;"></p>
   </div>
   <button class="btn-retry jp-retry" id="to-retry">もう一度挑戦する</button>
@@ -393,18 +405,18 @@ body{
 <!-- ══ RESULT ══ -->
 <div id="result-screen" class="screen">
   <div class="end-card">
-    <h2>🎉 クリア！</h2>
+    <h2 id="result-h2">🎉 クリア！</h2>
     <div class="end-score" id="res-total">0</div>
-    <div class="end-unit">点</div>
+    <div class="end-unit" id="res-unit">点</div>
     <div class="breakdown">
-      <div class="bd bd-correct"><div class="bd-v" id="res-correct">0</div><div class="bd-l">正解スコア</div></div>
-      <div class="bd bd-bonus"><div class="bd-v" id="res-bonus">+0</div><div class="bd-l">残り時間</div></div>
-      <div class="bd bd-total" id="bd-total-el"><div class="bd-v" id="res-sum">0</div><div class="bd-l">合計</div></div>
+      <div class="bd bd-correct"><div class="bd-v" id="res-correct">0</div><div class="bd-l" id="bd-correct-l">正解スコア</div></div>
+      <div class="bd bd-bonus"><div class="bd-v" id="res-bonus">+0</div><div class="bd-l" id="bd-bonus-l">残り時間</div></div>
+      <div class="bd bd-total" id="bd-total-el"><div class="bd-v" id="res-sum">0</div><div class="bd-l" id="bd-sum-l">合計</div></div>
     </div>
     <p id="end-msg"></p>
   </div>
   <div class="missed-wrap" id="missed-wrap" style="display:none">
-    <p>間違えた問題：</p><ul id="missed-list"></ul>
+    <p id="missed-label">間違えた問題：</p><ul id="missed-list"></ul>
   </div>
   <button class="btn-retry jp-retry" id="res-retry">もう一度挑戦する（新しい10問）</button>
   <button class="btn-home" id="res-home">← トップに戻る</button>
@@ -413,13 +425,13 @@ body{
 <!-- ══ RANKING ══ -->
 <div id="ranking-screen" class="screen">
   <div class="ranking-header">
-    <h2>🏆 スコアランキング</h2>
+    <h2 id="ranking-h2">🏆 スコアランキング</h2>
   </div>
   <div class="tab-row">
     <button class="tab-btn tab-jp active" id="tab-jp">🗾 日本の都道府県</button>
     <button class="tab-btn tab-world" id="tab-world">🌍 世界の国名</button>
   </div>
-  <div id="rank-body"><div class="rank-loading">読み込み中...</div></div>
+  <div id="rank-body"><div class="rank-loading" id="rank-loading">読み込み中...</div></div>
   <button class="btn-back" id="btn-back-rank">← トップに戻る</button>
 </div>
 
@@ -817,6 +829,345 @@ document.getElementById('tab-world').onclick = () => {
   renderRanking();
 };
 document.getElementById('btn-back-rank').onclick = () => showScreen('top-screen');
+
+/* ════════════════════════════════════
+   MULTI-LANGUAGE
+════════════════════════════════════ */
+const LANG = {
+  ja: {
+    appSr: '地理クイズ — 日本の都道府県と世界の国名',
+    topH1: 'Geography Quiz',
+    jpCardTitle: '日本の都道府県', jpCardSub: '47都道府県 / 10問', jpCardArrow: '▶ PLAY',
+    worldCardTitle: '世界の国名', worldCardSub: '世界195か国 / 10問', worldCardArrow: '▶ PLAY',
+    rankingBtn: '🏆 スコアランキングを見る',
+    rulesJP: '🗾 日本の都道府県', rulesWorld: '🌍 世界の国名',
+    rulesTitle: 'ルール確認',
+    rulesList: `制限時間：<span>100秒</span><br>1問正解 → <span>+10点</span>（最大100点）<br>間違えると <span>▼10秒</span> ペナルティ<br>全問クリア時の残り時間が <span>ボーナス加点</span><br>満点は最大 <span>200点</span>`,
+    nameLabel: 'プレーヤー名（ランキングに表示）',
+    namePlaceholder: '名前を入力...',
+    goBtn: 'ゲームスタート', cancelBtn: 'キャンセル',
+    qNum: (i) => `問題 ${i} / 10`,
+    scoreLabel: '得点：',
+    nextBtn: '次の問題 →', lastBtn: '結果を見る',
+    timeoutH2: '⏰ 時間切れ！', unit: '点',
+    toNote: (c,s) => `正解 ${c}問 × 10点 = ${s}点（ボーナスなし）`,
+    toRetry: 'もう一度挑戦する', toHome: '← トップに戻る',
+    resultH2: '🎉 クリア！',
+    bdCorrect: '正解スコア', bdBonus: '残り時間', bdSum: '合計',
+    endMsgs: ['もう少し！各地を旅してみましょう。','なかなか！もう少しで満点です。','すごい！地理マスターです！'],
+    missedLabel: '間違えた問題：',
+    resRetry: 'もう一度挑戦する（新しい10問）', resHome: '← トップに戻る',
+    rankH2: '🏆 スコアランキング',
+    tabJP: '🗾 日本の都道府県', tabWorld: '🌍 世界の国名',
+    rankLoading: '読み込み中...', rankEmpty: 'まだ記録がありません。<br>最初のプレーヤーになろう！',
+    backRank: '← トップに戻る',
+    correct: (p) => `正解！ +${p}点`,
+    wrong: (a) => `残念… 正解は「${a}」でした。`,
+    defaultName: '名無し',
+  },
+  en: {
+    appSr: 'Geography Quiz — Japan & World',
+    topH1: 'Geography Quiz',
+    jpCardTitle: 'Japan Prefectures', jpCardSub: '47 prefectures / 10 Q', jpCardArrow: '▶ PLAY',
+    worldCardTitle: 'World Countries', worldCardSub: '195 countries / 10 Q', worldCardArrow: '▶ PLAY',
+    rankingBtn: '🏆 View Score Ranking',
+    rulesJP: '🗾 Japan Prefectures', rulesWorld: '🌍 World Countries',
+    rulesTitle: 'Rules',
+    rulesList: `Time limit: <span>100 sec</span><br>Correct answer → <span>+10 pts</span> (max 100)<br>Wrong answer: <span>▼10 sec</span> penalty<br>Remaining time when cleared → <span>Bonus</span><br>Max score: <span>200 pts</span>`,
+    nameLabel: 'Player name (shown in ranking)',
+    namePlaceholder: 'Enter name...',
+    goBtn: 'Start Game', cancelBtn: 'Cancel',
+    qNum: (i) => `Q ${i} / 10`,
+    scoreLabel: 'Score: ',
+    nextBtn: 'Next →', lastBtn: 'See Results',
+    timeoutH2: '⏰ Time Up!', unit: 'pts',
+    toNote: (c,s) => `${c} correct × 10 = ${s} pts (no bonus)`,
+    toRetry: 'Try Again', toHome: '← Back to Top',
+    resultH2: '🎉 Clear!',
+    bdCorrect: 'Correct', bdBonus: 'Time Bonus', bdSum: 'Total',
+    endMsgs: ['Keep going! Explore more places.','Not bad! Almost perfect!','Amazing! Geography Master!'],
+    missedLabel: 'Missed questions:',
+    resRetry: 'Play Again (new 10 Qs)', resHome: '← Back to Top',
+    rankH2: '🏆 Score Ranking',
+    tabJP: '🗾 Japan', tabWorld: '🌍 World',
+    rankLoading: 'Loading...', rankEmpty: 'No records yet.<br>Be the first player!',
+    backRank: '← Back to Top',
+    correct: (p) => `Correct! +${p} pts`,
+    wrong: (a) => `Wrong… Answer: "${a}"`,
+    defaultName: 'Anonymous',
+  },
+  zh: {
+    appSr: '地理问答 — 日本都道府县和世界国名',
+    topH1: '地理问答',
+    jpCardTitle: '日本都道府县', jpCardSub: '47都道府县 / 10题', jpCardArrow: '▶ 开始',
+    worldCardTitle: '世界国名', worldCardSub: '世界195国 / 10题', worldCardArrow: '▶ 开始',
+    rankingBtn: '🏆 查看排行榜',
+    rulesJP: '🗾 日本都道府县', rulesWorld: '🌍 世界国名',
+    rulesTitle: '规则说明',
+    rulesList: `时间限制：<span>100秒</span><br>答对1题 → <span>+10分</span>（最高100分）<br>答错扣 <span>▼10秒</span><br>全部答对后剩余时间 <span>加分</span><br>最高 <span>200分</span>`,
+    nameLabel: '玩家名称（显示在排行榜）',
+    namePlaceholder: '输入名字...',
+    goBtn: '开始游戏', cancelBtn: '取消',
+    qNum: (i) => `第 ${i} / 10 题`,
+    scoreLabel: '得分：',
+    nextBtn: '下一题 →', lastBtn: '查看结果',
+    timeoutH2: '⏰ 时间到！', unit: '分',
+    toNote: (c,s) => `答对 ${c}题 × 10分 = ${s}分（无加分）`,
+    toRetry: '再来一次', toHome: '← 返回首页',
+    resultH2: '🎉 通关！',
+    bdCorrect: '答题得分', bdBonus: '剩余时间', bdSum: '合计',
+    endMsgs: ['继续加油！多了解各地吧。','不错！差一点就满分了。','太厉害了！地理达人！'],
+    missedLabel: '答错的题目：',
+    resRetry: '再来一次（新10题）', resHome: '← 返回首页',
+    rankH2: '🏆 分数排行榜',
+    tabJP: '🗾 日本', tabWorld: '🌍 世界',
+    rankLoading: '加载中...', rankEmpty: '暂无记录。<br>来做第一个玩家吧！',
+    backRank: '← 返回首页',
+    correct: (p) => `正确！+${p}分`,
+    wrong: (a) => `错误… 正确答案是「${a}」`,
+    defaultName: '无名氏',
+  },
+  ko: {
+    appSr: '지리 퀴즈 — 일본 도도부현과 세계 국명',
+    topH1: '지리 퀴즈',
+    jpCardTitle: '일본 도도부현', jpCardSub: '47개 도도부현 / 10문제', jpCardArrow: '▶ 시작',
+    worldCardTitle: '세계 국명', worldCardSub: '세계 195개국 / 10문제', worldCardArrow: '▶ 시작',
+    rankingBtn: '🏆 점수 랭킹 보기',
+    rulesJP: '🗾 일본 도도부현', rulesWorld: '🌍 세계 국명',
+    rulesTitle: '규칙 확인',
+    rulesList: `제한 시간：<span>100초</span><br>1문제 정답 → <span>+10점</span>（최대 100점）<br>오답 시 <span>▼10초</span> 패널티<br>전문제 클리어 시 남은 시간이 <span>보너스 점수</span><br>최고 점수 <span>200점</span>`,
+    nameLabel: '플레이어 이름（랭킹에 표시）',
+    namePlaceholder: '이름을 입력...',
+    goBtn: '게임 시작', cancelBtn: '취소',
+    qNum: (i) => `문제 ${i} / 10`,
+    scoreLabel: '점수：',
+    nextBtn: '다음 문제 →', lastBtn: '결과 보기',
+    timeoutH2: '⏰ 시간 초과！', unit: '점',
+    toNote: (c,s) => `정답 ${c}문제 × 10점 = ${s}점（보너스 없음）`,
+    toRetry: '다시 도전', toHome: '← 처음으로',
+    resultH2: '🎉 클리어！',
+    bdCorrect: '정답 점수', bdBonus: '남은 시간', bdSum: '합계',
+    endMsgs: ['조금 더 힘내세요！각지를 여행해보세요。','꽤 잘하네요！조금만 더 하면 만점이에요。','대단해요！지리 마스터입니다！'],
+    missedLabel: '틀린 문제：',
+    resRetry: '다시 도전（새 10문제）', resHome: '← 처음으로',
+    rankH2: '🏆 점수 랭킹',
+    tabJP: '🗾 일본', tabWorld: '🌍 세계',
+    rankLoading: '불러오는 중...', rankEmpty: '아직 기록이 없습니다。<br>첫 번째 플레이어가 되어보세요！',
+    backRank: '← 처음으로',
+    correct: (p) => `정답！+${p}점`,
+    wrong: (a) => `아쉽… 정답은 「${a}」였습니다。`,
+    defaultName: '익명',
+  }
+};
+
+let currentLang = 'ja';
+
+function setLang(lang) {
+  currentLang = lang;
+  localStorage.setItem('geo_lang', lang);
+  const t = LANG[lang];
+
+  // ボタンハイライト
+  ['ja','en','zh','ko'].forEach(l => {
+    const b = document.getElementById('lb-'+l);
+    if(b) { b.classList.toggle('lang-active', l===lang); }
+  });
+
+  // TOP
+  const appSr = document.getElementById('app-sr');
+  if(appSr) appSr.textContent = t.appSr;
+  setText('top-h1', t.topH1);
+  setText('jp-card-title', t.jpCardTitle);
+  setText('jp-card-sub', t.jpCardSub);
+  setText('jp-card-arrow', t.jpCardArrow);
+  setText('world-card-title', t.worldCardTitle);
+  setText('world-card-sub', t.worldCardSub);
+  setText('world-card-arrow', t.worldCardArrow);
+  setText('btn-ranking', t.rankingBtn);
+
+  // Rules
+  setText('rules-title', t.rulesTitle);
+  setHtml('rules-list', t.rulesList);
+  setText('name-label', t.nameLabel);
+  const pname = document.getElementById('player-name');
+  if(pname) pname.placeholder = t.namePlaceholder;
+  setText('go-btn', t.goBtn);
+  setText('cancel-rules', t.cancelBtn);
+
+  // Quiz
+  setText('score-label', t.scoreLabel);
+
+  // Timeout
+  setText('timeout-h2', t.timeoutH2);
+  setText('to-unit', t.unit);
+  setText('to-retry', t.toRetry);
+  setText('to-home', t.toHome);
+
+  // Result
+  setText('result-h2', t.resultH2);
+  setText('res-unit', t.unit);
+  setText('bd-correct-l', t.bdCorrect);
+  setText('bd-bonus-l', t.bdBonus);
+  setText('bd-sum-l', t.bdSum);
+  setText('res-retry', t.resRetry);
+  setText('res-home', t.resHome);
+  const missedLabel = document.getElementById('missed-label');
+  if(missedLabel) missedLabel.textContent = t.missedLabel;
+
+  // Ranking
+  setText('ranking-h2', t.rankH2);
+  setText('tab-jp', t.tabJP);
+  setText('tab-world', t.tabWorld);
+  setText('btn-back-rank', t.backRank);
+}
+
+function setText(id, text) {
+  const el = document.getElementById(id);
+  if(el) el.textContent = text;
+}
+function setHtml(id, html) {
+  const el = document.getElementById(id);
+  if(el) el.innerHTML = html;
+}
+
+// 言語を使うrenderQuestion / handleAnswer / showTimeout / showResult のオーバーライド
+const _origRenderQuestion = renderQuestion;
+renderQuestion = function(idx) {
+  _origRenderQuestion(idx);
+  const t = LANG[currentLang];
+  document.getElementById('q-num').textContent = t.qNum(idx+1);
+  const nb = document.getElementById('next-btn');
+  // 次ボタンのテキストは表示タイミングで設定するためhandleAnswer側で対応
+};
+
+const _origHandleAnswer = handleAnswer;
+handleAnswer = function(selected, q) {
+  if (answered) return;
+  answered = true;
+  const t = LANG[currentLang];
+  document.querySelectorAll('.choice-btn').forEach(btn => {
+    btn.disabled = true;
+    if (btn.textContent === q.answer) btn.classList.add('correct');
+    else if (btn.textContent === selected) btn.classList.add('wrong');
+  });
+  const fb = document.getElementById('feedback');
+  if (selected === q.answer) {
+    correctCount++;
+    document.getElementById('live-score').textContent = correctCount * PPQ;
+    fb.textContent = t.correct(PPQ);
+    fb.style.color = 'var(--green)';
+  } else {
+    fb.textContent = t.wrong(q.answer);
+    fb.style.color = 'var(--red)';
+    missed.push(q.p);
+    applyPenalty();
+  }
+  if (timeLeft > 0) {
+    const nb = document.getElementById('next-btn');
+    nb.style.display = 'block';
+    nb.textContent = current < 9 ? t.nextBtn : t.lastBtn;
+  }
+};
+
+const _origShowTimeout = showTimeout;
+showTimeout = function() {
+  clearInterval(timerInterval);
+  showScreen('timeout-screen');
+  const sc = correctCount * PPQ;
+  const t = LANG[currentLang];
+  document.getElementById('to-score').textContent = sc;
+  document.getElementById('to-note').textContent = t.toNote(correctCount, sc);
+  const isJP = mode === 'jp';
+  document.getElementById('to-retry').className = `btn-retry ${isJP ? 'jp-retry' : 'world-retry'}`;
+  document.getElementById('to-score').style.color = isJP ? 'var(--accent-jp)' : 'var(--accent-world)';
+  saveScore(mode, playerName, sc);
+};
+
+const _origShowResult = showResult;
+showResult = async function() {
+  clearInterval(timerInterval);
+  const cs = correctCount * PPQ;
+  const bonus = Math.max(0, timeLeft);
+  const total = cs + bonus;
+  await saveScore(mode, playerName, total);
+  showScreen('result-screen');
+  const t = LANG[currentLang];
+  const isJP = mode === 'jp';
+  document.getElementById('res-total').textContent = total;
+  document.getElementById('res-total').style.color = isJP ? 'var(--accent-jp)' : 'var(--accent-world)';
+  document.getElementById('res-correct').textContent = cs;
+  document.getElementById('res-bonus').textContent = `+${bonus}`;
+  document.getElementById('res-sum').textContent = total;
+  const bdTotal = document.getElementById('bd-total-el');
+  bdTotal.className = `bd ${isJP ? 'bd-total' : 'bd-total-world'}`;
+  document.getElementById('end-msg').textContent = correctCount <= 5 ? t.endMsgs[0] : correctCount <= 8 ? t.endMsgs[1] : t.endMsgs[2];
+  document.getElementById('res-retry').className = `btn-retry ${isJP ? 'jp-retry' : 'world-retry'}`;
+  if (missed.length > 0) {
+    document.getElementById('missed-wrap').style.display = 'block';
+    document.getElementById('missed-list').innerHTML = missed.map(p => `<li>${p}</li>`).join('');
+  } else {
+    document.getElementById('missed-wrap').style.display = 'none';
+  }
+};
+
+// renderRankingの「読み込み中」「記録なし」を多言語化
+const _origRenderRanking = renderRanking;
+renderRanking = async function() {
+  const t = LANG[currentLang];
+  const body = document.getElementById('rank-body');
+  body.innerHTML = `<div class="rank-loading">${t.rankLoading}</div>`;
+  const list = await loadRanking(rankTab);
+  if (list.length === 0) {
+    body.innerHTML = `<div class="rank-empty">${t.rankEmpty}</div>`;
+    return;
+  }
+  const isJP = rankTab === 'jp';
+  const dateLoc = {'ja':'ja-JP','en':'en-US','zh':'zh-CN','ko':'ko-KR'}[currentLang]||'ja-JP';
+  body.innerHTML = '<div class="rank-table">' +
+    list.map((r, i) => {
+      const numCls = i===0?'top1':i===1?'top2':i===2?'top3':'';
+      const num = i===0?'🥇':i===1?'🥈':i===2?'🥉':`${i+1}`;
+      const date = r.played_at ? new Date(r.played_at).toLocaleDateString(dateLoc) : '';
+      return '<div class="rank-row">' +
+        '<div class="rank-num ' + numCls + '">' + num + '</div>' +
+        '<div class="rank-name">' + escHtml(r.name) + '</div>' +
+        '<div class="rank-score ' + (isJP?'jp-s':'world-s') + '">' + r.score +
+        `<span style="font-size:10px;color:var(--muted)">${t.unit}</span></div>` +
+        '<div class="rank-date">' + date + '</div>' +
+        '</div>';
+    }).join('') + '</div>';
+};
+
+// go-btnのデフォルト名を多言語化
+document.getElementById('go-btn').onclick = () => {
+  playerName = document.getElementById('player-name').value.trim() || LANG[currentLang].defaultName;
+  document.getElementById('rules-overlay').classList.remove('open');
+  startQuiz();
+};
+
+// モード開始時のrules-titleを多言語化
+document.getElementById('btn-jp').onclick = () => {
+  mode = 'jp';
+  const t = LANG[currentLang];
+  document.getElementById('rules-title').textContent = t.rulesJP;
+  document.getElementById('go-btn').className = 'start-go jp-btn';
+  document.getElementById('player-name').className = 'name-input';
+  document.getElementById('rules-overlay').classList.add('open');
+};
+document.getElementById('btn-world').onclick = () => {
+  mode = 'world';
+  const t = LANG[currentLang];
+  document.getElementById('rules-title').textContent = t.rulesWorld;
+  document.getElementById('go-btn').className = 'start-go world-btn';
+  document.getElementById('player-name').className = 'name-input world-mode';
+  document.getElementById('rules-overlay').classList.add('open');
+};
+
+// 初期言語を復元
+(function(){
+  const saved = localStorage.getItem('geo_lang') || 'ja';
+  setLang(saved);
+})();
 </script>
   <!-- ポータルに戻るボタン -->
 <style>
