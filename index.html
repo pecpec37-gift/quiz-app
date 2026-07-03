@@ -205,7 +205,9 @@
     display:flex;align-items:center;justify-content:center;line-height:1.3;
   }
   .choice:active{transform:scale(.97);}
-  .choice:hover:not([disabled]){border-color:var(--accent);}
+  @media (hover:hover) and (pointer:fine){
+    .choice:hover:not([disabled]){border-color:var(--accent);}
+  }
   .choice.ox-mark{font-size:clamp(26px,8vw,34px);font-weight:800;}
   .choice.correct{background:rgba(70,192,138,.18);border-color:var(--green);color:#9fe6c2;}
   .choice.wrong{background:rgba(232,97,95,.16);border-color:var(--red);color:#f4a3a2;}
